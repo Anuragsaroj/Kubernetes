@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron-kaha
+  namespace: nginxsaroj
+spec:
+  schedule: " * * * * * "
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: minute-backup
+          labels:
+            app: kya-chala
+        spec:
+          containers:
+            - name: hello
+              image: busybox
+              command:
+              - sh
+              - -c
+              - >
+                echo "cronjob started" ;
+                mkdir -p /backup ;
+                echo "backup directory created" ;
+                mkdir -p /demo-data 
+                echo " demo-data directory created" ;
+                cp -r /demo-data /backup ;
+                echo "cronjob completed" ;
+              volumeMounts:
+                - name: demo-volume
+                  mountPath: /demo-data
+                - name: backup-volume
+                  mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+            - name: demo-volume
+              hostPath:
+                path: /demo-data
+                type: DirectoryOrCreate
+            - name: backup-volume
+              hostPath:
+                path: /backup
+                type: DirectoryOrCreate
